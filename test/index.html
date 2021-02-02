@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>测试Heatmap</title>
+  <style>
+    .box {
+      width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    #container {
+      width: 100%;
+      height: 300px;
+      background-color: rgba(0,0,0,.1);;
+    }
+  </style>
+</head>
+<body>
+<div class="box">
+  <h3>热图</h3>
+  <div id="container"></div>
+</div>
+<script src="http://localhost:4002/heatmap.js"></script>
+<script>
+  let heat = new Heatmap({
+    container: document.getElementById('container'),
+    onExtremaChange(e) {
+      console.log('极值变化', e)
+    }
+  })
+
+  function createData() {
+    let data = []
+    for (let i = 0; i < 10; i++) {
+      let value = i / 5
+      data.push({
+        position: {
+          top: i * 25,
+          left: i * 60,
+          width: 120,
+          height: 40
+        },
+        value
+      })
+    }
+    return data
+  }
+
+  heat.setData({
+    min: 0,
+    max: 1,
+    data: createData()
+  })
+
+  heat.addData({
+    position: {
+      top: 200,
+      left: 50,
+      width: 140,
+      height: 40
+    },
+    value: 0.99
+  })
+
+  heat.addData([{
+    position: {
+      top: 200,
+      left: 10
+    },
+    value: 0.5
+  }, {
+    position: {
+      top: 150,
+      left: 230,
+      width: 100,
+      height: 100
+    },
+    value: 2
+  }, {
+    position: {
+      top: 50,
+      left: 550,
+      width: 80,
+      height: 80
+    },
+    value: 1.5
+  }])
+
+  console.log(heat.getDataURL())
+</script>
+</body>
+</html>
