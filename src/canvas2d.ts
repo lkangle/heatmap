@@ -1,7 +1,7 @@
 import { HeatmapConfig, HeatData, PointInfo, Position } from './typings'
 import { getColorPalette } from './utils'
 
-const getPointTemplate = function(pos: Position, blurFactor: number, globalAlpha: number): HTMLCanvasElement {
+function getPointTemplate(pos: Position, blurFactor: number, globalAlpha: number): HTMLCanvasElement {
   const tplCanvas = document.createElement('canvas')
   const tplCtx = tplCanvas.getContext('2d')
   tplCanvas.width = pos.width
@@ -28,7 +28,7 @@ const getPointTemplate = function(pos: Position, blurFactor: number, globalAlpha
 }
 
 class Canvas2dRenderer {
-  private canvas: HTMLCanvasElement
+  public canvas: HTMLCanvasElement
   private shadowCanvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
 
@@ -59,10 +59,17 @@ class Canvas2dRenderer {
 
   private setStyles(config: HeatmapConfig) {
     const computed = window.getComputedStyle(this.config.container)
-    this.width = this.canvas.width = this.shadowCanvas.width = +(computed.width.replace(/px/, ''))
-    this.height = this.canvas.height = this.shadowCanvas.height = +(computed.height.replace(/px/, ''))
-    this.canvas.className = 'heatmap-canvas'
-    this.canvas.style.cssText = 'position:absolute;left:0;top:0;'
+    let width = +(computed.width.replace(/px/, ''))
+    let height = +(computed.height.replace(/px/, ''))
+    if (config.width && config.height) {
+      width = Math.max(config.width, width)
+      height = Math.max(config.height, height)
+    }
+
+    this.width = this.canvas.width = this.shadowCanvas.width = width
+    this.height = this.canvas.height = this.shadowCanvas.height = height
+    this.canvas.className = 'gio-heatmap-canvas'
+    this.canvas.style.cssText = 'position:absolute;left:0;top:0;z-index:1999999;'
 
     if (config.backgroundColor) {
       this.canvas.style.backgroundColor = config.backgroundColor
@@ -132,8 +139,8 @@ class Canvas2dRenderer {
   }
 
   /**
-   * 根据灰度值计算最终图片的明亮度
-   * @param alpha 黑白图灰度
+   * 计算透明度
+   * @param alpha 当前透明度 A的值
    */
   private computeAlpha(alpha: number) {
     const opacity = (this.config.opacity || 0) * 255

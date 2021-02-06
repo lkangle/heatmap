@@ -1,4 +1,4 @@
-import { HeatmapConfig, PointInfo } from './typings'
+import { HeatmapConfig, PointInfo, Position } from './typings'
 
 const defaultConfig: HeatmapConfig = {
   gradient: {
@@ -36,9 +36,24 @@ export function getColorPalette(config: HeatmapConfig) {
   return paletteCtx.getImageData(0, 0, 256, 1).data
 }
 
+function pointRound(num: number): number {
+  return Math.round(num / 10) * 10
+}
+
 export function getXY(point: PointInfo): number[] {
   const pos = point.position
-  return [pos.left + pos.width / 2, pos.top + pos.height / 2]
+  return [pointRound(pos.left + pos.width / 2) >> 0, pointRound(pos.top + pos.height / 2) >> 0]
+}
+
+/**
+ * 比较两个面积的大小
+ *
+ * @param source
+ * @param target
+ * @return 0 一般大 >0 source更大 <0 target更大
+ */
+export function compareArea(source: Position, target: Position): number {
+  return source.width * source.height - target.width * target.height
 }
 
 /**
@@ -48,8 +63,7 @@ export function getXY(point: PointInfo): number[] {
  */
 export function mergeInfo(source: PointInfo, target: PointInfo): PointInfo {
   let position = source.position
-  if (position.width * position.height <
-    target.position.width * target.position.height) {
+  if (compareArea(position, target.position) < 0) {
     position = target.position
   }
 

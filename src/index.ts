@@ -9,7 +9,7 @@ import Store from './store'
 class Heatmap {
   public config: HeatmapConfig
   private store: Store
-  public renderer: Canvas2dRenderer
+  private renderer: Canvas2dRenderer
 
   constructor(config: HeatmapConfig) {
     this.config = mergeConfig(config)
@@ -39,6 +39,10 @@ class Heatmap {
 
   public getDataURL(): string {
     return this.renderer.getDataURL()
+  }
+
+  public getCanvas(): HTMLCanvasElement {
+    return this.renderer.canvas
   }
 }
 

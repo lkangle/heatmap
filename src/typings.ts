@@ -1,6 +1,3 @@
-
-export type Maybe<T> = null | T
-
 export interface Extrema {
   min: number
   max: number
@@ -8,14 +5,16 @@ export interface Extrema {
 }
 
 export interface HeatmapConfig {
-  container: Maybe<HTMLElement>
+  container: HTMLElement
+  width?: number,
+  height?: number,
   backgroundColor?: string
-  gradient: object
+  gradient?: object
   opacity?: number
-  maxOpacity: number
-  minOpacity: number
+  maxOpacity?: number
+  minOpacity?: number
   onExtremaChange?: (e: Extrema) => void
-  blur: number
+  blur?: number
 }
 
 export interface Position {

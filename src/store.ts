@@ -22,7 +22,7 @@ class Store {
     this.pointData = {}
   }
 
-  private specRect(point: PointInfo): PointInfo {
+  private inferRect(point: PointInfo): PointInfo {
     const position = point.position
     if (!position.height || !position.width) {
       Object.assign(position, this.defaultRect)
@@ -38,17 +38,17 @@ class Store {
   private organiseData(points: PointInfo[]): PointData {
     const pointData: PointData = {}
     points.forEach(point => {
-      point = this.specRect(point)
+      point = this.inferRect(point)
       const [x, y] = getXY(point)
       const key = x + ':' + y
-      const value = point.value
-
       const prev = this.pointData[key]
       if (prev) {
         this.pointData[key] = pointData[key] = mergeInfo(prev, point)
       } else {
         this.pointData[key] = pointData[key] = point
       }
+      const value = this.pointData[key].value
+
       this.min = Math.min(value, this.min)
       this.max = Math.max(value, this.max)
     })
