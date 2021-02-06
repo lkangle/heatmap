@@ -1,13 +1,15 @@
 {
   "name": "@lkl/heatmap",
-  "version": "1.0.2",
-  "main": "dist/heatmap.es.js",
+  "version": "1.0.3",
+  "main": "dist/heatmap.cjs",
+  "module": "dist/heatmap.mjs",
   "license": "MIT",
   "scripts": {
+    "build:cjs": "builder -i src/index.ts -o dist/heatmap.cjs -f cjs",
+    "build:es": "builder -i src/index.ts -o dist/heatmap.mjs -f esm",
     "build": "builder -i src/index.ts -o dist/heatmap.js -n Heatmap",
-    "build:es": "builder -i src/index.ts -o dist/heatmap.es.js -f esm",
     "dev": "builder -i src/index.ts -o dist/heatmap.js -n Heatmap -s -w",
-    "prepublishOnly": "npm run build:es"
+    "prepublishOnly": "npm run build:es && npm run build:cjs"
   },
   "keywords": [
     "heatmap",
@@ -23,7 +25,7 @@
     "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-typescript": "^7.12.7",
-    "@lkl/builder": "^1.1.0",
+    "@lkl/builder": "^1.1.3",
     "@types/jest": "^26.0.20",
     "@typescript-eslint/eslint-plugin": "^4.9.0",
     "@typescript-eslint/parser": "^4.9.0",

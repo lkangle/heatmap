@@ -45,9 +45,25 @@ var Heatmap = (function () {
     paletteCtx.fillRect(0, 0, 256, 1);
     return paletteCtx.getImageData(0, 0, 256, 1).data;
   }
+
+  function pointRound(num) {
+    return Math.round(num / 10) * 10;
+  }
+
   function getXY(point) {
     const pos = point.position;
-    return [pos.left + pos.width / 2, pos.top + pos.height / 2];
+    return [pointRound(pos.left + pos.width / 2) >> 0, pointRound(pos.top + pos.height / 2) >> 0];
+  }
+  /**
+   * 比较两个面积的大小
+   *
+   * @param source
+   * @param target
+   * @return 0 一般大 >0 source更大 <0 target更大
+   */
+
+  function compareArea(source, target) {
+    return source.width * source.height - target.width * target.height;
   }
   /**
    * 将点信息合并，保留面积更大的
@@ -58,7 +74,7 @@ var Heatmap = (function () {
   function mergeInfo(source, target) {
     let position = source.position;
 
-    if (position.width * position.height < target.position.width * target.position.height) {
+    if (compareArea(position, target.position) < 0) {
       position = target.position;
     }
 
@@ -68,7 +84,7 @@ var Heatmap = (function () {
     };
   }
 
-  const getPointTemplate = function (pos, blurFactor, globalAlpha) {
+  function getPointTemplate(pos, blurFactor, globalAlpha) {
     const tplCanvas = document.createElement('canvas');
     const tplCtx = tplCanvas.getContext('2d');
     tplCanvas.width = pos.width;
@@ -93,7 +109,7 @@ var Heatmap = (function () {
     }
 
     return tplCanvas;
-  };
+  }
 
   class Canvas2dRenderer {
     constructor(config) {
@@ -133,10 +149,18 @@ var Heatmap = (function () {
 
     setStyles(config) {
       const computed = window.getComputedStyle(this.config.container);
-      this.width = this.canvas.width = this.shadowCanvas.width = +computed.width.replace(/px/, '');
-      this.height = this.canvas.height = this.shadowCanvas.height = +computed.height.replace(/px/, '');
-      this.canvas.className = 'heatmap-canvas';
-      this.canvas.style.cssText = 'position:absolute;left:0;top:0;';
+      let width = +computed.width.replace(/px/, '');
+      let height = +computed.height.replace(/px/, '');
+
+      if (config.width && config.height) {
+        width = Math.max(config.width, width);
+        height = Math.max(config.height, height);
+      }
+
+      this.width = this.canvas.width = this.shadowCanvas.width = width;
+      this.height = this.canvas.height = this.shadowCanvas.height = height;
+      this.canvas.className = 'gio-heatmap-canvas';
+      this.canvas.style.cssText = 'position:absolute;left:0;top:0;z-index:1999999;';
 
       if (config.backgroundColor) {
         this.canvas.style.backgroundColor = config.backgroundColor;
@@ -203,8 +227,8 @@ var Heatmap = (function () {
       ctx.putImageData(img, 0, 0);
     }
     /**
-     * 根据灰度值计算最终图片的明亮度
-     * @param alpha 黑白图灰度
+     * 计算透明度
+     * @param alpha 当前透明度 A的值
      */
 
 
@@ -269,7 +293,7 @@ var Heatmap = (function () {
       this.pointData = {};
     }
 
-    specRect(point) {
+    inferRect(point) {
       const position = point.position;
 
       if (!position.height || !position.width) {
@@ -288,10 +312,9 @@ var Heatmap = (function () {
     organiseData(points) {
       const pointData = {};
       points.forEach(point => {
-        point = this.specRect(point);
+        point = this.inferRect(point);
         const [x, y] = getXY(point);
         const key = x + ':' + y;
-        const value = point.value;
         const prev = this.pointData[key];
 
         if (prev) {
@@ -300,6 +323,7 @@ var Heatmap = (function () {
           this.pointData[key] = pointData[key] = point;
         }
 
+        const value = this.pointData[key].value;
         this.min = Math.min(value, this.min);
         this.max = Math.max(value, this.max);
       });
@@ -400,6 +424,10 @@ var Heatmap = (function () {
 
     getDataURL() {
       return this.renderer.getDataURL();
+    }
+
+    getCanvas() {
+      return this.renderer.canvas;
     }
 
   }
